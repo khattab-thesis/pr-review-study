@@ -167,9 +167,20 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,san
 /* unique-sentence highlighting */
 .rcontent .uniq-A{background:rgba(88,166,255,0.16);border-left:3px solid #58a6ff;padding-left:6px;margin-left:-9px;border-radius:2px}
 .rcontent .uniq-B{background:rgba(163,113,247,0.16);border-left:3px solid #a371f7;padding-left:6px;margin-left:-9px;border-radius:2px}
-#diffLegend,#warmDiffLegend{display:flex;gap:14px;align-items:center;font-size:.78rem;color:var(--t2);margin:6px 0 8px;flex-wrap:wrap}
+#diffLegend,#warmDiffLegend{display:flex;gap:10px;align-items:center;font-size:.78rem;color:var(--t2);margin:0 0 10px;flex-wrap:wrap}
 #diffLegend .swatch,#warmDiffLegend .swatch{display:inline-block;width:12px;height:12px;border-radius:2px;margin-right:5px;vertical-align:middle}
-#diffLegend .toggle-uniq,#warmDiffLegend .toggle-uniq{margin-left:auto;cursor:pointer;color:var(--t2);text-decoration:underline;font-size:.78rem;background:none;border:none;padding:0}
+/* The toggle used to be a muted underlined link below the reviews, so raters
+   met the aid only after they had finished reading. It is now a labelled control
+   above the pair. The default stays off: highlighting shades about twice as much
+   text in one arm as the other, so making it automatic would impose that
+   salience difference on every trial (see ANALYSIS_PLAN.md, contrast C2). */
+#diffLegend .toggle-uniq,#warmDiffLegend .toggle-uniq{cursor:pointer;color:var(--blue);font-size:.8rem;font-weight:600;background:var(--bg2);border:1px solid var(--blue);border-radius:16px;padding:5px 13px;transition:background .15s,color .15s}
+#diffLegend .toggle-uniq:hover,#warmDiffLegend .toggle-uniq:hover{background:var(--blue);color:#fff}
+#diffLegend .toggle-uniq.on,#warmDiffLegend .toggle-uniq.on{background:var(--blue);color:#fff}
+#diffLegend .hl-hint,#warmDiffLegend .hl-hint{color:var(--t3)}
+#diffLegend .hl-key,#warmDiffLegend .hl-key{display:none;gap:14px}
+#diffLegend.on .hl-key,#warmDiffLegend.on .hl-key{display:flex}
+#diffLegend.on .hl-hint,#warmDiffLegend.on .hl-hint{display:none}
 .diff-hidden .uniq-A,.diff-hidden .uniq-B{background:transparent;border-left:0;padding-left:0;margin-left:0}
 
 /* ── 5-point Preference Scale ── */
@@ -418,7 +429,7 @@ kbd{display:inline-block;font-family:monospace;font-size:.7rem;background:var(--
     <p style="color:var(--t3);font-size:.88rem">You do <em>not</em> need deep knowledge of the codebase. Judge the review text itself: is it specific and grounded in the diff, or vague and generic?</p>
 
     <h3>Reading aids</h3>
-    <p>Each review begins with a short summary of what that review claims. Where a review names a file, that file path is marked with a dotted underline &mdash; hover over it (or focus it with the keyboard) to see what we found about that file when we checked the project. These notes describe the file only; they do not say that the review is correct. You can optionally turn on highlighting to locate text unique to each review. Highlighting starts off, and naming more files is not automatically better.</p>
+    <p>Each review begins with a short summary of what that review claims. Where a review names a file, that file path is marked with a dotted underline &mdash; hover over it (or focus it with the keyboard) to see what we found about that file when we checked the project. These notes describe the file only; they do not say that the review is correct. Above each pair of reviews there is a button, <strong>Highlight what differs</strong>, which shades the points that appear in only one of the two reviews; it is optional, starts off, and you can switch it on and off at any time. Naming more files is not automatically better.</p>
 
     <h3>Using the diff (optional)</h3>
     <p>The diff shows exactly what code changed. It is collapsed by default &mdash; you can judge the reviews without it. Expand it when you want to check whether a review describes a real risk in the changed code or a hypothetical one.</p>
@@ -515,6 +526,14 @@ kbd{display:inline-block;font-family:monospace;font-size:.7rem;background:var(--
     </div>
   </div>
 
+  <div id="warmDiffLegend">
+    <button class="toggle-uniq" id="warmToggleUniqBtn" type="button">Highlight what differs</button>
+    <span class="hl-hint">Optional. Shades the points that appear in only one of the two reviews. It stays available on every comparison.</span>
+    <span class="hl-key">
+      <span><span class="swatch" style="background:rgba(88,166,255,0.16);border-left:3px solid #58a6ff"></span>only in Review A</span>
+      <span><span class="swatch" style="background:rgba(163,113,247,0.16);border-left:3px solid #a371f7"></span>only in Review B</span>
+    </span>
+  </div>
   <div class="comparison-grid">
     <div class="review-card">
       <div class="review-card-header"><span style="width:24px;height:24px;border-radius:6px;background:#58a6ff;display:inline-flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:800;color:#fff">A</span><span style="color:#58a6ff">Review A</span></div>
@@ -524,11 +543,6 @@ kbd{display:inline-block;font-family:monospace;font-size:.7rem;background:var(--
       <div class="review-card-header"><span style="width:24px;height:24px;border-radius:6px;background:#a371f7;display:inline-flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:800;color:#fff">B</span><span style="color:#a371f7">Review B</span></div>
       <div class="review-card-body"><div class="rsummary"><div class="rsummary-label">Summary of this review's claims &mdash; not verified facts</div><ul><li>Says the retry logic <em>may not be robust enough</em>, but doesn't pinpoint why.</li><li>Suggests adding error handling and tests in general terms, without naming files or cases.</li></ul></div><div class="rcounts"><div class="rcounts-label">Concrete items named (auto-counted &mdash; hover to see them)</div><div class="rcounts-chips"><span class="rcount-chip" title="Components/APIs:&#10;• fetch()">Components/APIs <b>1</b></span><span class="rcount-chip zero" title="Files:&#10;none">Files <b>0</b></span><span class="rcount-chip zero" title="Test targets:&#10;none">Test targets <b>0</b></span><span class="rcount-chip zero" title="Edge cases:&#10;none">Edge cases <b>0</b></span><span class="rcount-chip zero" title="Reasoned claims:&#10;none">Reasoned claims <b>0</b></span></div></div><div class="rcontent"><h2>Problems found</h2><p>The retry logic in <code>fetch()</code> may not handle failures robustly enough.</p><h2>Files and lines referenced</h2><p><code>fetch()</code> method retry loop.</p><h2>What could go wrong</h2><p>The retry mechanism looks reasonable but could be improved.</p><h2>Suggestions</h2><p>Consider adding some error handling and tests. <span class="uniq-B">The code should also follow best practices for retry logic.</span></p></div></div>
     </div>
-  </div>
-  <div id="warmDiffLegend">
-    <span><span class="swatch" style="background:rgba(88,166,255,0.16);border-left:3px solid #58a6ff"></span>unique to Review A</span>
-    <span><span class="swatch" style="background:rgba(163,113,247,0.16);border-left:3px solid #a371f7"></span>unique to Review B</span>
-    <button class="toggle-uniq" id="warmToggleUniqBtn" type="button">show highlighted differences</button>
   </div>
 
   <div class="pref5-section">
@@ -608,13 +622,15 @@ kbd{display:inline-block;font-family:monospace;font-size:.7rem;background:var(--
     <div class="diff-view" id="diffC"></div>
   </div>
 
-  <div class="comparison-grid" id="reviewGrid"></div>
   <div id="diffLegend">
-    <span><span class="swatch" style="background:rgba(88,166,255,0.16);border-left:3px solid #58a6ff"></span>unique to Review A</span>
-    <span><span class="swatch" style="background:rgba(163,113,247,0.16);border-left:3px solid #a371f7"></span>unique to Review B</span>
-    <span style="color:var(--t3)">optional &mdash; highlighting starts off</span>
-    <button class="toggle-uniq" id="toggleUniqBtn" type="button">show highlighted differences</button>
+    <button class="toggle-uniq" id="toggleUniqBtn" type="button">Highlight what differs</button>
+    <span class="hl-hint">Optional. Shades the points that appear in only one of the two reviews.</span>
+    <span class="hl-key">
+      <span><span class="swatch" style="background:rgba(88,166,255,0.16);border-left:3px solid #58a6ff"></span>only in Review A</span>
+      <span><span class="swatch" style="background:rgba(163,113,247,0.16);border-left:3px solid #a371f7"></span>only in Review B</span>
+    </span>
   </div>
+  <div class="comparison-grid" id="reviewGrid"></div>
 
   <button class="jump-btn" id="jumpBtn">&#8595; Jump to Questions</button>
 
@@ -1308,12 +1324,17 @@ function render(idx) {
 
   // Optional semantic highlighting starts off on every trial.
   const toggleBtn = document.getElementById("toggleUniqBtn");
+  const legend = document.getElementById("diffLegend");
   const grid = document.getElementById("reviewGrid");
   grid.classList.add("diff-hidden");
-  toggleBtn.textContent = "show highlighted differences";
+  legend.classList.remove("on");
+  toggleBtn.classList.remove("on");
+  toggleBtn.textContent = "Highlight what differs";
   toggleBtn.onclick = function() {
     const hidden = grid.classList.toggle("diff-hidden");
-    toggleBtn.textContent = hidden ? "show highlighted differences" : "hide highlighted differences";
+    legend.classList.toggle("on", !hidden);
+    toggleBtn.classList.toggle("on", !hidden);
+    toggleBtn.textContent = hidden ? "Highlight what differs" : "Hide highlighting";
     if (!hidden) {
       highlightUseLog[task.taskId] = true;
       save();
@@ -1579,11 +1600,16 @@ function showWarmup() {
   showScreen("warmup");
   const warm = document.getElementById("warmup");
   const highlightBtn = document.getElementById("warmToggleUniqBtn");
+  const warmLegend = document.getElementById("warmDiffLegend");
   warm.classList.remove("highlights-on");
-  highlightBtn.textContent = "show highlighted differences";
+  warmLegend.classList.remove("on");
+  highlightBtn.classList.remove("on");
+  highlightBtn.textContent = "Highlight what differs";
   highlightBtn.onclick = () => {
     const on = warm.classList.toggle("highlights-on");
-    highlightBtn.textContent = on ? "hide highlighted differences" : "show highlighted differences";
+    warmLegend.classList.toggle("on", on);
+    highlightBtn.classList.toggle("on", on);
+    highlightBtn.textContent = on ? "Hide highlighting" : "Highlight what differs";
   };
   buildCritGrid("warmCritGrid", "warm");
   wireOverall("warm");
