@@ -122,7 +122,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,san
 
 /* ── Review Side-by-Side ── */
 .comparison-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
-@media(max-width:900px){.comparison-grid{grid-template-columns:1fr}}
+/* 899, not 900, so this breakpoint and MIN_WIDTH below agree exactly: at
+   MIN_WIDTH the pair is still two columns. */
+@media(max-width:899px){.comparison-grid{grid-template-columns:1fr}}
+/* Below MIN_WIDTH the reviews stack, Review B lands roughly three screens under
+   Review A, and one trial costs ~6 screens of scrolling instead of ~2 (measured
+   at 390px and 360px). The instrument asks which review better names the
+   affected code, which assumes both are readable together, so narrow screens
+   are turned away rather than silently given a different task. */
+#smallScreen{display:none;position:fixed;inset:0;z-index:10000;background:var(--bg0);
+  padding:32px 24px;overflow-y:auto;align-items:center;justify-content:center;text-align:center}
+#smallScreen.show{display:flex}
+#smallScreen .ss-inner{max-width:460px}
+#smallScreen h2{font-size:1.15rem;color:var(--blue);margin-bottom:14px}
+#smallScreen p{color:var(--t2);font-size:.92rem;line-height:1.65;margin-bottom:12px}
+#smallScreen .ss-note{color:var(--t3);font-size:.85rem}
 .review-card{background:var(--bg1);border:1px solid var(--brd);border-radius:10px;overflow:hidden;display:flex;flex-direction:column}
 .review-card-header{padding:8px 14px;font-weight:700;font-size:.85rem;border-bottom:1px solid var(--bg3);display:flex;align-items:center;gap:8px}
 /* Cap was 600px, which every one of the 12 reviews exceeded (measured at
@@ -325,6 +339,15 @@ kbd{display:inline-block;font-family:monospace;font-size:.7rem;background:var(--
 </style>
 </head>
 <body>
+
+<div id="smallScreen">
+  <div class="ss-inner">
+    <h2>Please open this on a larger screen</h2>
+    <p>This study asks you to compare two code reviews <strong>side by side</strong>. On a narrow screen the two reviews stack one under the other, which makes that comparison much harder and would change what we are measuring.</p>
+    <p>Please open this page on a laptop or desktop. If you are already on one, widening the browser window is enough.</p>
+    <p class="ss-note">Nothing is lost &mdash; the link works whenever you come back, and any progress is saved on the device you started on.</p>
+  </div>
+</div>
 <button class="theme-toggle" id="themeToggle" title="Toggle light/dark mode">&#9790;</button>
 <div class="container">
 
@@ -1565,6 +1588,7 @@ function submitTaskToSheet(taskId) {
     study_id: STUDY_ID,
     instrument_version: STUDY.version,
     build_id: BUILD_ID,                 // which deployed build produced this row
+    viewport: window.innerWidth + "x" + window.innerHeight,
     rater_id: raterId,
     started_at: startedAt,              // without this the sheet has no session duration
     completed_at: new Date().toISOString(),
@@ -1589,7 +1613,7 @@ function submitTaskToSheet(taskId) {
 }
 function submitFeedbackToSheet(text) {
   if (!text) return;
-  sendToSheet({study_id:STUDY_ID,instrument_version:STUDY.version,build_id:BUILD_ID,rater_id:raterId,completed_at:new Date().toISOString(),feedback:text});
+  sendToSheet({study_id:STUDY_ID,instrument_version:STUDY.version,build_id:BUILD_ID,viewport:window.innerWidth+"x"+window.innerHeight,rater_id:raterId,completed_at:new Date().toISOString(),feedback:text});
 }
 
 /* ═══ Feedback & completion ═══ */
@@ -1723,7 +1747,17 @@ function beginEval() {
    against the copy served now and reloads once past the cache if they differ;
    BUILD_ID also travels on every payload, so `raw_log` can always answer which
    build a response came from. */
-const BUILD_ID = "2026-08-19-endpoint-v5";
+const BUILD_ID = "2026-08-19-min-width-gate";
+
+/* Matches the 899px grid breakpoint above: at 900px the reviews are still two
+   columns. The gate is re-evaluated on resize and rotation rather than latched,
+   so widening a window or turning a tablet to landscape lifts it, and no state
+   is discarded while it is up. */
+const MIN_WIDTH = 900;
+function applyViewportGate() {
+  const gate = document.getElementById("smallScreen");
+  if (gate) gate.classList.toggle("show", window.innerWidth < MIN_WIDTH);
+}
 async function ensureFreshBuild() {
   try {
     const r = await fetch(location.pathname + "?freshcheck=" + Date.now(), {cache:"no-store"});
@@ -1739,6 +1773,9 @@ async function ensureFreshBuild() {
 let hasExistingProgress = false;
 async function init() {
   ensureFreshBuild();
+  applyViewportGate();
+  window.addEventListener("resize", applyViewportGate);
+  window.addEventListener("orientationchange", applyViewportGate);
   await loadStudy();
   const inp=document.getElementById("raterInput"), btn=document.getElementById("startBtn");
   inp.addEventListener("input", () => {
