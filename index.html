@@ -1564,6 +1564,7 @@ function submitTaskToSheet(taskId) {
   const payload = {
     study_id: STUDY_ID,
     instrument_version: STUDY.version,
+    build_id: BUILD_ID,                 // which deployed build produced this row
     rater_id: raterId,
     started_at: startedAt,              // without this the sheet has no session duration
     completed_at: new Date().toISOString(),
@@ -1588,7 +1589,7 @@ function submitTaskToSheet(taskId) {
 }
 function submitFeedbackToSheet(text) {
   if (!text) return;
-  sendToSheet({study_id:STUDY_ID,instrument_version:STUDY.version,rater_id:raterId,completed_at:new Date().toISOString(),feedback:text});
+  sendToSheet({study_id:STUDY_ID,instrument_version:STUDY.version,build_id:BUILD_ID,rater_id:raterId,completed_at:new Date().toISOString(),feedback:text});
 }
 
 /* ═══ Feedback & completion ═══ */
@@ -1714,8 +1715,30 @@ function beginEval() {
 }
 
 /* ═══ Init ═══ */
+/* Bump on any deploy that changes behaviour raters or the data path depend on.
+   A run on 2026-08-19 13:53Z posted to the previous Apps Script deployment,
+   eleven minutes after its replacement went live, because the browser held a
+   cached index.html carrying the old SHEET_URL — and nothing in the payload
+   revealed which build had produced it. The check below compares this constant
+   against the copy served now and reloads once past the cache if they differ;
+   BUILD_ID also travels on every payload, so `raw_log` can always answer which
+   build a response came from. */
+const BUILD_ID = "2026-08-19-endpoint-v5";
+async function ensureFreshBuild() {
+  try {
+    const r = await fetch(location.pathname + "?freshcheck=" + Date.now(), {cache:"no-store"});
+    if (!r.ok) return;
+    const m = (await r.text()).match(/const BUILD_ID = "([^"]+)"/);
+    if (!m || m[1] === BUILD_ID) return;
+    if (sessionStorage.getItem("heval4_reloaded_for") === m[1]) return;  // never loop
+    sessionStorage.setItem("heval4_reloaded_for", m[1]);
+    location.replace(location.pathname + "?b=" + encodeURIComponent(m[1]));
+  } catch (e) { /* offline or blocked: carry on with what is loaded */ }
+}
+
 let hasExistingProgress = false;
 async function init() {
+  ensureFreshBuild();
   await loadStudy();
   const inp=document.getElementById("raterInput"), btn=document.getElementById("startBtn");
   inp.addEventListener("input", () => {
