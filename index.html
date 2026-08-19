@@ -1472,7 +1472,12 @@ function goPrev() {
 }
 
 /* ═══ Webhook ═══ */
-const SHEET_URL = "https://script.google.com/macros/s/AKfycbx2Ehlz0WYC4JvZnF-2hFV9veZGHRgPOa3UCydO27WrnxevV0DcTpEbKAxixM2igMp7Gg/exec";
+// Apps Script v4-2026-08-19. A *new* deployment mints a new /exec URL, so this
+// constant must be updated whenever one is created; editing an existing
+// deployment ("Manage deployments" -> pencil -> New version) keeps the URL and
+// avoids this step. The previous v3 deployment is still reachable and still
+// corrupts ranged demographics values, so nothing may point at it.
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbyzMBMt16gj4JhjY1I-aEaKG7nYv2xCQPkBCMIUFJHQdzSiOBTp2X5ePMY7yIpcd-Ig/exec";
 
 function _outboxKey() { return "heval4_outbox_"+STUDY_ID+"_"+STUDY.version+"_"+(raterId||"_anon"); }
 function appendToOutbox(payload) {
