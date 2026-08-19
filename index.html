@@ -89,7 +89,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,san
 .topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--brd);margin-bottom:16px;flex-wrap:wrap;gap:10px}
 .topbar .logo{font-weight:700;color:var(--blue);font-size:.95rem}
 .pbar{width:180px;height:5px;background:var(--bg2);border-radius:3px;overflow:hidden;display:inline-block;vertical-align:middle;margin:0 8px}
-.pfill{height:100%;background:linear-gradient(90deg,var(--blue),var(--purple));border-radius:3px;transition:width .3s}
+/* display:block is load-bearing — as an inline span the fill ignored the width
+   set on it in updProg(), so the bar rendered as an empty track at every step. */
+.pfill{display:block;width:0;height:100%;background:linear-gradient(90deg,var(--blue),var(--purple));border-radius:3px;transition:width .3s}
 .ptxt{font-size:.82rem;color:var(--t2)}
 .timer{font-family:monospace;font-size:.82rem;color:var(--t3)}
 
