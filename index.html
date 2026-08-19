@@ -264,6 +264,23 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,san
 /* ── Feedback ── */
 #feedback.active{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:70vh;text-align:center}
 .feedback-card{background:var(--bg1);border:1px solid var(--brd);border-radius:12px;padding:28px 32px;max-width:700px;width:100%;text-align:left}
+/* Submission receipt. The POST is a simple cross-origin request (text/plain),
+   so the Apps Script reply is readable and the page can state whether the data
+   actually arrived instead of asking the rater to keep a backup just in case. */
+.sstatus{margin:14px auto 0;padding:14px 18px;border:1px solid var(--brd);border-radius:10px;max-width:560px;background:var(--bg1)}
+.sstatus .ss-line{display:flex;align-items:center;justify-content:center;gap:9px;margin:0;font-size:.92rem;color:var(--t1)}
+.sstatus .ss-mark{width:18px;height:18px;border-radius:50%;flex-shrink:0;display:inline-block}
+.sstatus.checking .ss-mark{border:2px solid var(--bg3);border-top-color:var(--blue);animation:ssSpin .7s linear infinite}
+@keyframes ssSpin{to{transform:rotate(360deg)}}
+.sstatus.ok{border-color:var(--green)}
+.sstatus.ok .ss-mark{background:var(--green);position:relative}
+.sstatus.ok .ss-mark::after{content:"";position:absolute;left:6px;top:2px;width:4px;height:9px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg)}
+.sstatus.fail{border-color:var(--orange)}
+.sstatus.fail .ss-mark{background:var(--orange);color:#fff;font-weight:800;font-size:.8rem;line-height:18px;text-align:center}
+.sstatus.fail .ss-mark::after{content:"!"}
+.sstatus .ss-sub{font-size:.85rem;color:var(--t2);margin:10px 0 12px}
+.sstatus #ssFail{display:none}
+.sstatus.fail #ssFail{display:block}
 .feedback-card h2{font-size:1.15rem;color:var(--blue);margin-bottom:8px;text-align:center}
 .feedback-card p{color:var(--t2);font-size:.88rem;margin-bottom:16px;text-align:center}
 .feedback-card textarea{width:100%;min-height:120px;background:var(--bg2);border:1px solid var(--brd);border-radius:8px;padding:12px;color:var(--t1);font-size:.9rem;font-family:inherit;resize:vertical;outline:none}
@@ -696,11 +713,13 @@ kbd{display:inline-block;font-family:monospace;font-size:.7rem;background:var(--
     <div class="scard"><div class="sl">Total Time</div><div class="sv" id="stT">--</div></div>
     <div class="scard"><div class="sl">Avg / PR</div><div class="sv" id="stA">--</div></div>
   </div>
-  <p style="color:var(--t2)">Your responses are saved on this device, and submission to the research endpoint was attempted.</p>
-  <div id="exportBackup" style="margin-top:14px;padding:14px;border:1px solid var(--brd);border-radius:10px;max-width:560px;margin-left:auto;margin-right:auto;background:var(--bg1)">
-    <p style="font-size:.9rem;color:var(--t1);margin:0 0 8px"><strong>Backup copy</strong></p>
-    <p style="font-size:.85rem;color:var(--t2);margin:0 0 10px">Because this page cannot independently confirm server receipt, please download this backup and keep it until the researcher confirms receipt.</p>
-    <button id="downloadBackupBtn" class="btn btn-s" style="font-size:.9rem">Download my responses (.json)</button>
+  <div id="submitStatus" class="sstatus checking">
+    <p class="ss-line"><span class="ss-mark"></span><span id="ssText">Confirming your submission&hellip;</span></p>
+    <div id="ssFail">
+      <p class="ss-sub">Your answers are safely stored in this browser, so nothing is lost. Please try again, or download the file and send it to the researcher.</p>
+      <button id="retrySubmitBtn" class="btn btn-p" style="font-size:.9rem">Try again</button>
+      <button id="downloadBackupBtn" class="btn btn-s" style="font-size:.9rem;margin-left:8px">Download my responses (.json)</button>
+    </div>
   </div>
 </div>
 
@@ -1457,9 +1476,23 @@ const SHEET_URL = "https://script.google.com/macros/s/AKfycbx2Ehlz0WYC4JvZnF-2hF
 
 function _outboxKey() { return "heval4_outbox_"+STUDY_ID+"_"+STUDY.version+"_"+(raterId||"_anon"); }
 function appendToOutbox(payload) {
-  try { const key=_outboxKey(); const cur=JSON.parse(localStorage.getItem(key)||"[]"); cur.push({queued_at:new Date().toISOString(),payload}); localStorage.setItem(key,JSON.stringify(cur)); } catch(e) {}
+  const id = Date.now()+"_"+Math.random().toString(36).slice(2,8);
+  try { const key=_outboxKey(); const cur=JSON.parse(localStorage.getItem(key)||"[]"); cur.push({id:id,queued_at:new Date().toISOString(),acked:false,payload:payload}); localStorage.setItem(key,JSON.stringify(cur)); } catch(e) {}
+  return id;
 }
 function loadOutbox() { try { return JSON.parse(localStorage.getItem(_outboxKey())||"[]"); } catch(e) { return []; } }
+function markAcked(id) {
+  try {
+    const key=_outboxKey(); const cur=JSON.parse(localStorage.getItem(key)||"[]");
+    let hit=false;
+    cur.forEach(it=>{ if(it && it.id===id){ it.acked=true; hit=true; } });
+    if (hit) localStorage.setItem(key,JSON.stringify(cur));
+  } catch(e) {}
+}
+// Entries written before receipts existed carry no `acked` flag; treating them
+// as unconfirmed is the safe reading, and a resend is deduplicated downstream
+// by (rater_id, pr_id, comparison).
+function pendingOutbox() { return loadOutbox().filter(it => it && it.payload && !it.acked); }
 function downloadResponseBackup() {
   const data={study_id:STUDY_ID,instrument_version:STUDY.version,rater_id:raterId,exported_at:new Date().toISOString(),payloads:loadOutbox()};
   const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
@@ -1467,22 +1500,45 @@ function downloadResponseBackup() {
   const a=document.createElement("a"); a.href=url; a.download=STUDY_ID+"_"+(raterId||"anon")+"_"+new Date().toISOString().replace(/[:.]/g,"-")+".json";
   document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
 }
+/* Resolves true only when the endpoint answered {ok:true}. The request is kept
+   CORS-simple (text/plain, no custom headers) so the browser sends it without a
+   preflight and lets us read the reply; the Apps Script reads the raw body and
+   does not care about the declared content type. */
 function postPayload(payload, retries=3) {
+  const body = JSON.stringify(payload);
   function attempt(n) {
-    try { fetch(SHEET_URL,{method:"POST",body:JSON.stringify(payload),mode:"no-cors"}).catch(()=>{if(n>1)setTimeout(()=>attempt(n-1),2000*(4-n))}); }
-    catch(e) { if(n>1) setTimeout(()=>attempt(n-1),2000*(4-n)); }
+    return fetch(SHEET_URL, {method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"}, body:body})
+      .then(r => r.ok ? r.text() : Promise.reject(new Error("HTTP "+r.status)))
+      .then(t => { let j=null; try { j=JSON.parse(t); } catch(_) {}
+                   if (j && j.ok === true) return true;
+                   throw new Error(j && j.error ? j.error : "no confirmation"); })
+      .catch(() => n > 1
+        ? new Promise(res => setTimeout(res, 1500*(4-n))).then(() => attempt(n-1))
+        : false);
   }
-  attempt(retries);
+  return attempt(retries);
 }
+let inFlight = [];
 function sendToSheet(payload, retries=3) {
-  appendToOutbox(payload);
-  postPayload(payload,retries);
+  const id = appendToOutbox(payload);
+  const p = postPayload(payload, retries).then(ok => { if (ok) markAcked(id); return ok; });
+  inFlight.push(p);
+  return p;
 }
-function replayOutbox() {
-  loadOutbox().forEach(item => {
-    if(item && item.payload) postPayload(item.payload,1);
+/* Resends only what has not been confirmed, and reports how much is still
+   unconfirmed so the completion screen can tell the rater the truth. */
+function flushOutbox() {
+  const waiting = inFlight.slice();
+  return Promise.all(waiting.map(p => p.catch(() => false))).then(() => {
+    inFlight = inFlight.filter(p => waiting.indexOf(p) === -1);
+    const pending = pendingOutbox();
+    if (!pending.length) return 0;
+    return Promise.all(pending.map(it =>
+      postPayload(it.payload, 2).then(ok => { if (ok && it.id) markAcked(it.id); return ok; })
+    )).then(() => pendingOutbox().length);
   });
 }
+function replayOutbox() { return flushOutbox(); }
 function submitTaskToSheet(taskId) {
   const r = ratings[taskId]; if (!r) return;
   const parts = taskId.split("_");
@@ -1547,6 +1603,24 @@ function showDone() {
   document.getElementById("stA").textContent = n>0 ? Math.round(tt/n/1000)+"s" : "--";
   const dlBtn = document.getElementById("downloadBackupBtn");
   if (dlBtn) dlBtn.onclick = downloadResponseBackup;
+  const retryBtn = document.getElementById("retrySubmitBtn");
+  if (retryBtn) retryBtn.onclick = confirmSubmission;
+  confirmSubmission();
+}
+function setSubmitStatus(state, text) {
+  const box = document.getElementById("submitStatus");
+  if (!box) return;
+  box.className = "sstatus " + state;
+  document.getElementById("ssText").textContent = text;
+}
+function confirmSubmission() {
+  setSubmitStatus("checking", "Confirming your submission\u2026");
+  return flushOutbox().then(pending => {
+    if (pending === 0) setSubmitStatus("ok", "Your responses have been received. Thank you \u2014 you can close this page.");
+    else setSubmitStatus("fail", "We could not confirm that all your responses reached the server.");
+  }).catch(() => {
+    setSubmitStatus("fail", "We could not confirm that all your responses reached the server.");
+  });
 }
 
 /* ═══ Screen routing ═══ */
