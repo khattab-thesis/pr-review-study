@@ -123,7 +123,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,san
 @media(max-width:900px){.comparison-grid{grid-template-columns:1fr}}
 .review-card{background:var(--bg1);border:1px solid var(--brd);border-radius:10px;overflow:hidden;display:flex;flex-direction:column}
 .review-card-header{padding:8px 14px;font-weight:700;font-size:.85rem;border-bottom:1px solid var(--bg3);display:flex;align-items:center;gap:8px}
-.review-card-body{padding:12px;overflow-y:auto;flex:1;max-height:600px}
+/* Cap was 600px, which every one of the 12 reviews exceeded (measured at
+   639-957px across 1280-1920px screens), so every trial began with two
+   independent inner scrollbars. At 1000px no review scrolls internally: the
+   page scrolls as one unit and the two columns stay aligned. */
+.review-card-body{padding:12px;overflow-y:auto;flex:1;max-height:1000px}
 .rsummary{background:var(--bg3);border:1px solid var(--brd);border-radius:8px;padding:8px 10px 8px 12px;margin-bottom:12px}
 .rsummary-label{font-size:.66rem;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--t3);margin-bottom:5px;display:flex;align-items:center;gap:5px}
 .rsummary-label::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--t3);display:inline-block}
