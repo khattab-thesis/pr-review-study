@@ -448,7 +448,7 @@ kbd{display:inline-block;font-family:monospace;font-size:.7rem;background:var(--
     <h2>What You'll Do</h2>
     <p>For each of <strong>6 real Pull Requests</strong> from open-source projects, you will:</p>
     <ol>
-      <li><strong>Read the PR context</strong> &mdash; every PR starts with a short plain-language box explaining what the project is and what the change does (no knowledge of the project or of Python is needed). The code diff is available below it but <strong>collapsed by default</strong> &mdash; expand it only if you want to check a detail; the plain-language box gives you the intent.</li>
+      <li><strong>Read the PR context</strong> &mdash; every PR starts with a short plain-language box explaining what the project is and what the change does (no knowledge of the project or of Python is needed). The code diff is shown below it, <strong>open by default</strong> &mdash; use it to check whether a review describes a real risk in the changed code, and collapse it if you would rather work from the plain-language box alone.</li>
       <li><strong>Read both AI-generated reviews</strong> side by side &mdash; <strong style="color:#58a6ff">Review A</strong> and <strong style="color:#a371f7">Review B</strong>. You won't know which AI strategy produced which review. Judge only what each review actually says.</li>
       <li><strong>Judge each review on 6 criteria</strong> &mdash; for every criterion, mark whether <strong style="color:#58a6ff">Review A</strong> does it better, <strong style="color:#a371f7">Review B</strong> does it better, <strong style="color:#3fb950">Both</strong> address it about equally, or <strong>Neither</strong> addresses it.</li>
       <li><strong>Give one overall preference</strong> &mdash; after the 6 criteria, make a single holistic call: which review is more useful overall (or about the same).</li>
@@ -477,8 +477,9 @@ kbd{display:inline-block;font-family:monospace;font-size:.7rem;background:var(--
     <h3>Reading aids</h3>
     <p>Each review begins with a short summary of what that review claims. Where a review names a file, that file path is marked with a dotted underline &mdash; hover over it (or focus it with the keyboard) to see what we found about that file when we checked the project. These notes describe the file only; they do not say that the review is correct. Above each pair of reviews there is a button, <strong>Highlight what differs</strong>, which shades the points that appear in only one of the two reviews; it is optional, starts off, and you can switch it on and off at any time. Naming more files is not automatically better.</p>
 
-    <h3>Using the diff (optional)</h3>
-    <p>The diff shows exactly what code changed. It is collapsed by default &mdash; you can judge the reviews without it. Expand it when you want to check whether a review describes a real risk in the changed code or a hypothetical one.</p>
+    <h3>Using the diff</h3>
+    <p>The diff shows exactly what code changed, and it is open by default so you can check whether a review describes a real risk in the changed code or a hypothetical one. Collapse it with the header if you prefer to work from the plain-language box.</p>
+    <p>One thing to keep in mind: the diff contains only the files this PR changed. A review may also mention code elsewhere in the project that the change could affect. The diff can neither confirm nor refute those mentions &mdash; use <strong>View on GitHub</strong> if you want to check one.</p>
 
     <h3>Tips</h3>
     <ul>
@@ -544,9 +545,9 @@ kbd{display:inline-block;font-family:monospace;font-size:.7rem;background:var(--
     <div class="meta"><span>example/web-service</span></div>
   </div>
 
-  <div class="diff-section collapsed">
+  <div class="diff-section">
     <div class="diff-header" onclick="this.closest('.diff-section').classList.toggle('collapsed');this.querySelector('.diff-toggle').textContent=this.closest('.diff-section').classList.contains('collapsed')?'click to expand':'click to collapse'">
-      <span>Diff &mdash; optional reference</span><span class="diff-toggle">click to expand</span>
+      <span>Diff &mdash; the exact code changes</span><span class="diff-toggle">click to collapse</span>
     </div>
     <div class="diff-view">
       <div class="diff-file">
@@ -663,7 +664,7 @@ kbd{display:inline-block;font-family:monospace;font-size:.7rem;background:var(--
 
   <div class="diff-section" id="diffSection">
     <div class="diff-header" onclick="document.getElementById('diffSection').classList.toggle('collapsed');this.querySelector('.diff-toggle').textContent=this.closest('.diff-section').classList.contains('collapsed')?'click to expand':'click to collapse'">
-      <span>Diff &mdash; the exact code changes (optional: expand if you want to check a detail; the plain-language box above covers the intent)</span><span class="diff-toggle">click to expand</span>
+      <span>Diff &mdash; the exact code changes (only the files this PR changed; a review may also mention code elsewhere in the project)</span><span class="diff-toggle">click to collapse</span>
     </div>
     <div class="diff-view" id="diffC"></div>
   </div>
@@ -1363,11 +1364,13 @@ function render(idx) {
   else document.getElementById("bodySection").style.display="none";
 
   document.getElementById("diffC").innerHTML = renderDiff(pr.diff);
-  // v2 (2026-08-01): diff collapsed by default — pilot feedback said the
-  // required reading was too heavy; the diff is optional reference.
+  // r14 (2026-08-24): the diff opens on every trial. It was collapsed from
+  // 2026-08-01 on pilot reading-load feedback, at the cost of letting F3* be
+  // answered without ever seeing the code. Reset per trial so a rater who
+  // collapses it on one PR still gets the code in front of them on the next.
   const ds = document.getElementById("diffSection");
-  ds.classList.add("collapsed");
-  ds.querySelector(".diff-toggle").textContent = "click to expand";
+  ds.classList.remove("collapsed");
+  ds.querySelector(".diff-toggle").textContent = "click to collapse";
 
   buildReviewPair(pr, task.taskId);
 
@@ -1749,7 +1752,7 @@ function beginEval() {
    against the copy served now and reloads once past the cache if they differ;
    BUILD_ID also travels on every payload, so `raw_log` can always answer which
    build a response came from. */
-const BUILD_ID = "2026-08-24-time-estimate";
+const BUILD_ID = "2026-08-24-diff-default-open";
 
 /* Matches the 899px grid breakpoint above: at 900px the reviews are still two
    columns. The gate is re-evaluated on resize and rotation rather than latched,
