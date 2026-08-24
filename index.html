@@ -1767,7 +1767,7 @@ function beginEval() {
    against the copy served now and reloads once past the cache if they differ;
    BUILD_ID also travels on every payload, so `raw_log` can always answer which
    build a response came from. */
-const BUILD_ID = "2026-08-24-gate-message";
+const BUILD_ID = "2026-08-24-data-epoch";
 
 /* Matches the 899px grid breakpoint above: at 900px the reviews are still two
    columns. The gate is re-evaluated on resize and rotation rather than latched,
@@ -1796,6 +1796,30 @@ function applyViewportGate() {
   if (now) now.textContent = window.innerWidth;
   gate.querySelectorAll("#ssMin, .ss-min").forEach(el => { el.textContent = MIN_WIDTH; });
 }
+/* Bumped by hand when a change makes answers given before it incomparable with
+   answers given after. A version bump already has this effect on its own, since
+   load() refuses a saved session whose instrumentVersion differs; this is the
+   switch for the copy-only builds that ride on BUILD_ID and deliberately keep
+   progress. It is not tied to BUILD_ID, because then a typo fix would discard
+   the work of everyone who is mid-study. */
+const DATA_EPOCH = "2026-08-24";
+function applyDataEpoch() {
+  const key = "heval4_data_epoch";
+  let prev;
+  try { prev = localStorage.getItem(key); } catch (e) { return; }
+  if (prev === DATA_EPOCH) return;
+  /* Saved progress only. Outbox entries can still hold a submission the server
+     has not acknowledged, which is the one thing here that exists nowhere else,
+     and the theme is not study data. Comparisons already acknowledged are safe
+     on the server; a rater who redoes one produces a second row for the same
+     (rater, PR), and the analysis keeps the later of the two. */
+  if (prev !== null) {
+    Object.keys(localStorage)
+      .filter(k => k.indexOf("heval_" + STUDY_ID + "_") === 0 || k === "heval4_last_rater")
+      .forEach(k => localStorage.removeItem(k));
+  }
+  try { localStorage.setItem(key, DATA_EPOCH); } catch (e) {}
+}
 async function ensureFreshBuild() {
   try {
     const r = await fetch(location.pathname + "?freshcheck=" + Date.now(), {cache:"no-store"});
@@ -1811,6 +1835,7 @@ async function ensureFreshBuild() {
 let hasExistingProgress = false;
 async function init() {
   ensureFreshBuild();
+  applyDataEpoch();
   applyViewportGate();
   window.addEventListener("resize", applyViewportGate);
   window.addEventListener("orientationchange", applyViewportGate);
