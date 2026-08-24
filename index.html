@@ -98,8 +98,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,san
 /* ── PR Header ── */
 .prh{background:var(--bg1);border:1px solid var(--brd);border-radius:10px;padding:16px;margin-bottom:12px}
 .prh .title{font-size:1.05rem;font-weight:600;margin-bottom:4px}
-.prh .meta{font-size:.82rem;color:var(--t2);display:flex;gap:14px;flex-wrap:wrap}
+.prh .meta{font-size:.82rem;color:var(--t2);display:flex;gap:14px;flex-wrap:wrap;align-items:center}
 .prh .meta a{color:var(--blue);text-decoration:none}
+/* The GitHub link is the only route to code the diff does not contain, so it is
+   a button rather than a run of link text in the metadata row. */
+.prh .meta a#prLink{margin-left:auto;display:inline-flex;align-items:center;gap:6px;font-weight:600;font-size:.8rem;padding:5px 13px;border:1px solid var(--blue);border-radius:16px;background:var(--bg2);transition:background .15s,color .15s}
+.prh .meta a#prLink:hover{background:var(--blue);color:#fff}
+.prh .meta a#prLink .ext{font-size:.9em;line-height:1}
 
 /* ── Diff ── */
 .diff-section{background:var(--bg1);border:1px solid var(--brd);border-radius:8px;margin-bottom:12px;overflow:hidden}
@@ -479,7 +484,7 @@ kbd{display:inline-block;font-family:monospace;font-size:.7rem;background:var(--
 
     <h3>Using the diff</h3>
     <p>The diff shows exactly what code changed, and it is open by default so you can check whether a review describes a real risk in the changed code or a hypothetical one. Collapse it with the header if you prefer to work from the plain-language box.</p>
-    <p>One thing to keep in mind: the diff contains only the files this PR changed. A review may also mention code elsewhere in the project that the change could affect. The diff can neither confirm nor refute those mentions &mdash; use <strong>View on GitHub</strong> if you want to check one.</p>
+    <p>One thing to keep in mind: the diff contains only the files this PR changed. A review may also mention code elsewhere in the project that the change could affect. The diff can neither confirm nor refute those mentions &mdash; use <strong>Open this PR on GitHub</strong>, the button at the top right of each PR, if you want to check one.</p>
 
     <h3>Tips</h3>
     <ul>
@@ -650,7 +655,7 @@ kbd{display:inline-block;font-family:monospace;font-size:.7rem;background:var(--
     <div class="meta">
       <span id="prRepo"></span>
       <span id="prNumber" style="color:var(--t3)"></span>
-      <a id="prLink" href="#" target="_blank" rel="noopener">View on GitHub</a>
+      <a id="prLink" href="#" target="_blank" rel="noopener">Open this PR on GitHub <span class="ext" aria-hidden="true">&#8599;</span></a>
     </div>
     <div id="ctxSection" style="display:none;margin-top:10px;padding:10px 12px;background:var(--bg2);border:1px solid var(--bg3);border-radius:8px;font-size:.9rem;color:var(--t1);line-height:1.55">
       <div style="font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--t3);margin-bottom:5px">What this PR does — plain language</div>
@@ -1752,7 +1757,7 @@ function beginEval() {
    against the copy served now and reloads once past the cache if they differ;
    BUILD_ID also travels on every payload, so `raw_log` can always answer which
    build a response came from. */
-const BUILD_ID = "2026-08-24-diff-default-open";
+const BUILD_ID = "2026-08-24-gh-button";
 
 /* Matches the 899px grid breakpoint above: at 900px the reviews are still two
    columns. The gate is re-evaluated on resize and rotation rather than latched,
