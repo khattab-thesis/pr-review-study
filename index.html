@@ -64,7 +64,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,san
 .demo-opts label:hover{background:var(--bg3);color:var(--t2)}
 .demo-opts input{display:none}
 .demo-opts label.selected{background:var(--blue);border-color:var(--blue);color:#fff}
-.demo-hint{display:block;font-size:.74rem;font-weight:400;color:var(--t3);margin:-2px 0 6px}
 /* Occupation labels name the role explicitly ("Junior Developer", not
    "Junior"), which needs two lines per cell to keep all six on one row. */
 .demo-opts.wrap2 label{white-space:normal;line-height:1.2;display:flex;align-items:center;justify-content:center;min-height:40px;padding:6px 4px}
@@ -405,10 +404,9 @@ kbd{display:inline-block;font-family:monospace;font-size:.7rem;background:var(--
     <p class="demo-sub">Three quick questions before we start.</p>
     <div class="demo-group">
       <span class="demo-q">Primary occupation</span>
-      <span class="demo-hint">Pick whichever takes more of your time. PhD students: choose Researcher.</span>
       <div class="demo-opts wrap2" data-field="role">
         <label onclick="demoSelect(this)"><input type="radio" name="d_role" value="student">Student</label>
-        <label onclick="demoSelect(this)"><input type="radio" name="d_role" value="phd_researcher">Researcher</label>
+        <label onclick="demoSelect(this)"><input type="radio" name="d_role" value="phd_researcher">PhD / Researcher</label>
         <label onclick="demoSelect(this)"><input type="radio" name="d_role" value="junior_dev">Junior Developer</label>
         <label onclick="demoSelect(this)"><input type="radio" name="d_role" value="mid_level_dev">Mid-level Developer</label>
         <label onclick="demoSelect(this)"><input type="radio" name="d_role" value="senior_dev">Senior Developer</label>
@@ -1751,7 +1749,7 @@ function beginEval() {
    against the copy served now and reloads once past the cache if they differ;
    BUILD_ID also travels on every payload, so `raw_log` can always answer which
    build a response came from. */
-const BUILD_ID = "2026-08-24-device-token";
+const BUILD_ID = "2026-08-24-occupation-label";
 
 /* Matches the 899px grid breakpoint above: at 900px the reviews are still two
    columns. The gate is re-evaluated on resize and rotation rather than latched,
