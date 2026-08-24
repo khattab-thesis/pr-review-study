@@ -377,7 +377,7 @@ kbd{display:inline-block;font-family:monospace;font-size:.7rem;background:var(--
   <div class="consent-card">
     <h2>Informed Consent</h2>
     <p>You are being invited to participate in a research study on AI-assisted code review quality, conducted as part of a Master's thesis at the Hasso Plattner Institute, University of Potsdam.</p>
-    <p><strong>What you will do:</strong> For each of 6 Pull Requests, you will read a plain-language description and two AI-generated reviews side by side, then judge which review is more useful. The code diff is available as an optional reference. The study takes about 25&ndash;35 minutes; progress is saved after every Pull Request, so you can take breaks.</p>
+    <p><strong>What you will do:</strong> For each of 6 Pull Requests, you will read a plain-language description and two AI-generated reviews side by side, then judge which review is more useful. The code diff is shown alongside them. The study takes about 25&ndash;35 minutes; progress is saved after every Pull Request, so you can take breaks.</p>
     <p><strong>What is recorded:</strong></p>
     <ul>
       <li>The identifier you enter. It does not have to be your real name &mdash; any nickname you will remember is fine, and it lets you resume if you take a break.</li>
@@ -406,7 +406,7 @@ kbd{display:inline-block;font-family:monospace;font-size:.7rem;background:var(--
 <div id="demographics" class="screen">
   <div class="demo-card">
     <h2>About You</h2>
-    <p class="demo-sub">Three quick questions before we start.</p>
+    <p class="demo-sub">Three background questions.</p>
     <div class="demo-group">
       <span class="demo-q">Primary occupation</span>
       <div class="demo-opts wrap2" data-field="role">
@@ -457,7 +457,7 @@ kbd{display:inline-block;font-family:monospace;font-size:.7rem;background:var(--
       <li><strong>Read both AI-generated reviews</strong> side by side &mdash; <strong style="color:#58a6ff">Review A</strong> and <strong style="color:#a371f7">Review B</strong>. You won't know which AI strategy produced which review. Judge only what each review actually says.</li>
       <li><strong>Judge each review on 6 criteria</strong> &mdash; for every criterion, mark whether <strong style="color:#58a6ff">Review A</strong> does it better, <strong style="color:#a371f7">Review B</strong> does it better, <strong style="color:#3fb950">Both</strong> address it about equally, or <strong>Neither</strong> addresses it.</li>
       <li><strong>Give one overall preference</strong> &mdash; after the 6 criteria, make a single holistic call: which review is more useful overall (or about the same).</li>
-      <li><strong>Briefly explain why</strong> in a text box (optional &mdash; one sentence is enough).</li>
+      <li><strong>Explain your choice</strong> in a text box (optional).</li>
       <li><strong>Rate the difficulty</strong> of the comparison (1&ndash;5).</li>
     </ol>
 
@@ -488,16 +488,15 @@ kbd{display:inline-block;font-family:monospace;font-size:.7rem;background:var(--
 
     <h3>Tips</h3>
     <ul>
-      <li>There are no right or wrong answers &mdash; we want your honest impression.</li>
-      <li>Some pairs will look similar. That's expected. Even a small but concrete difference counts.</li>
-      <li>If you're unsure, "no preference" is a valid answer &mdash; don't force a pick.</li>
-      <li>The "why" text box is optional, but even one sentence helps us understand your reasoning.</li>
+      <li>There are no right or wrong answers.</li>
+      <li>Some pairs will look similar. A small but concrete difference is still a difference.</li>
+      <li>Where neither review is better, <strong>Both</strong>, <strong>Neither</strong> and <strong>About the same</strong> are valid answers.</li>
     </ul>
   </div>
 
   <div class="brief-card">
     <h2>The 6 Criteria</h2>
-    <p>Instead of one overall "who wins", you judge the reviews on <strong>6 specific criteria</strong>. For <em>each</em> one you choose one of four: <strong style="color:#58a6ff">Review A</strong> does it better, <strong style="color:#a371f7">Review B</strong> does it better, <strong style="color:#3fb950">Both</strong> address it about equally well, or <strong>Neither</strong> addresses it at all.</p>
+    <p>Before the overall judgement, you compare the reviews on <strong>6 specific criteria</strong>. For <em>each</em> one you choose one of four: <strong style="color:#58a6ff">Review A</strong> does it better, <strong style="color:#a371f7">Review B</strong> does it better, <strong style="color:#3fb950">Both</strong> address it about equally well, or <strong>Neither</strong> addresses it at all.</p>
     <table style="width:100%;border-collapse:collapse;font-size:.86rem;margin-top:10px">
       <tr style="border-bottom:1px solid var(--brd)">
         <td style="padding:8px 10px;color:var(--t1);font-weight:700;white-space:nowrap;vertical-align:top">Names the affected code</td>
@@ -529,7 +528,7 @@ kbd{display:inline-block;font-family:monospace;font-size:.7rem;background:var(--
 
   <div class="brief-nav">
     <button class="btn btn-s" onclick="showScreen('demographics')">&larr; Back</button>
-    <button class="btn btn-p" id="beginBtn">Got it &mdash; start with a practice round &rarr;</button>
+    <button class="btn btn-p" id="beginBtn">Continue to the practice round &rarr;</button>
   </div>
 </div>
 
@@ -538,7 +537,7 @@ kbd{display:inline-block;font-family:monospace;font-size:.7rem;background:var(--
   <div class="topbar">
     <div style="display:flex;align-items:center;gap:14px">
       <span class="logo">Practice Round</span>
-      <span style="font-size:.82rem;color:var(--orange);font-weight:600">This does not count &mdash; just get familiar with the interface</span>
+      <span style="font-size:.82rem;color:var(--orange);font-weight:600">Not recorded &mdash; for familiarity with the interface</span>
     </div>
   </div>
 
@@ -614,9 +613,9 @@ kbd{display:inline-block;font-family:monospace;font-size:.7rem;background:var(--
   </div>
 
   <div class="why-section">
-    <h4>Why? <span style="font-weight:400;color:var(--t3)">(optional in practice round)</span></h4>
-    <p class="why-sub">What made you choose that option? 1&ndash;2 sentences is enough.</p>
-    <textarea id="warmWhy" placeholder="e.g. Review A names the specific file and explains the backoff risk concretely; Review B is vague..."></textarea>
+    <h4>Why did you choose that? <span style="font-weight:400;color:var(--t3);font-size:.82rem">(optional)</span></h4>
+    <p class="why-sub">Which difference between the two reviews decided it?</p>
+    <textarea id="warmWhy" placeholder="e.g. Review A named the file and explained the backoff risk; Review B stayed general."></textarea>
   </div>
 
   <div class="difficulty-section">
@@ -631,8 +630,8 @@ kbd{display:inline-block;font-family:monospace;font-size:.7rem;background:var(--
   </div>
 
   <div style="text-align:center;padding:20px 0;border-top:1px solid var(--brd);margin-top:6px">
-    <p style="color:var(--t3);font-size:.85rem;margin-bottom:14px">Answer all 6 criteria and a difficulty rating to unlock the button.</p>
-    <button class="btn btn-g" id="warmDoneBtn" style="font-size:1rem;padding:12px 28px" disabled>I'm ready &mdash; start the real study &rarr;</button>
+    <p style="color:var(--t3);font-size:.85rem;margin-bottom:14px">Answer all 6 criteria and the difficulty rating to continue.</p>
+    <button class="btn btn-g" id="warmDoneBtn" style="font-size:1rem;padding:12px 28px" disabled>Start the study &rarr;</button>
   </div>
 </div>
 
@@ -703,9 +702,9 @@ kbd{display:inline-block;font-family:monospace;font-size:.7rem;background:var(--
   </div>
 
   <div class="why-section">
-    <h4>Why did you choose that? <span style="font-weight:400;color:var(--t3);font-size:.82rem">(optional &mdash; even one short sentence helps us a lot)</span></h4>
-    <p class="why-sub">What specific difference in the reviews drove your choice? E.g. "Review A named the exact test file; Review B only said 'add tests'."</p>
-    <textarea id="whyText" placeholder="e.g. 'Review A named the specific function and line number; Review B only said the method is risky.' or 'Both said the same thing about test coverage but Review B was more concrete about which file to add tests to.'"></textarea>
+    <h4>Why did you choose that? <span style="font-weight:400;color:var(--t3);font-size:.82rem">(optional)</span></h4>
+    <p class="why-sub">Which difference between the two reviews decided it?</p>
+    <textarea id="whyText" placeholder="e.g. Review A named the exact test file; Review B only said 'add tests'."></textarea>
   </div>
 
   <div class="difficulty-section">
@@ -723,9 +722,9 @@ kbd{display:inline-block;font-family:monospace;font-size:.7rem;background:var(--
 <!-- ═══ FEEDBACK ═══ -->
 <div id="feedback" class="screen">
   <div class="feedback-card">
-    <h2>Thank You!</h2>
-    <p>Before we finish, we'd love to hear your thoughts. This is optional.</p>
-    <textarea id="feedbackText" placeholder="Any feedback on the study? What was confusing, what was clear, any suggestions?"></textarea>
+    <h2>Feedback</h2>
+    <p>Optional, and the last step.</p>
+    <textarea id="feedbackText" placeholder="Anything that was unclear, and any suggestions for the study."></textarea>
     <div class="fb-btns">
       <button class="btn btn-s" id="skipFbBtn">Skip</button>
       <button class="btn btn-p" id="submitFbBtn">Submit Feedback</button>
@@ -745,7 +744,7 @@ kbd{display:inline-block;font-family:monospace;font-size:.7rem;background:var(--
   <div id="submitStatus" class="sstatus checking">
     <p class="ss-line"><span class="ss-mark"></span><span id="ssText">Confirming your submission&hellip;</span></p>
     <div id="ssFail">
-      <p class="ss-sub">Your answers are safely stored in this browser, so nothing is lost. Please try again, or download the file and send it to the researcher.</p>
+      <p class="ss-sub">Your answers are stored in this browser, so nothing is lost. Try again, or download the file and send it to the researcher.</p>
       <button id="retrySubmitBtn" class="btn btn-p" style="font-size:.9rem">Try again</button>
       <button id="downloadBackupBtn" class="btn btn-s" style="font-size:.9rem;margin-left:8px">Download my responses (.json)</button>
     </div>
@@ -1757,7 +1756,7 @@ function beginEval() {
    against the copy served now and reloads once past the cache if they differ;
    BUILD_ID also travels on every payload, so `raw_log` can always answer which
    build a response came from. */
-const BUILD_ID = "2026-08-24-gh-button";
+const BUILD_ID = "2026-08-24-copy-sweep";
 
 /* Matches the 899px grid breakpoint above: at 900px the reviews are still two
    columns. The gate is re-evaluated on resize and rotation rather than latched,
