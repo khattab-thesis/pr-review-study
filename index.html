@@ -357,7 +357,7 @@ kbd{display:inline-block;font-family:monospace;font-size:.7rem;background:var(--
   <p class="sub">Human evaluation of AI-generated code review comments &mdash; HPI Master's Thesis</p>
   <div class="wcard">
     <p>You will read <strong>6 Pull Requests</strong> from real open-source projects and compare two AI-generated reviews for each.</p>
-    <p style="color:var(--t3);font-size:.85rem;margin-bottom:16px">Takes approximately 15&ndash;25 minutes. Progress is saved on this device &mdash; you can take breaks.</p>
+    <p style="color:var(--t3);font-size:.85rem;margin-bottom:16px">Takes about 25&ndash;35 minutes. Progress is saved on this device, so you can stop at any point and pick up where you left off.</p>
     <div class="igroup">
       <input type="text" id="raterInput" placeholder="Enter your name or a nickname" autocomplete="off" />
       <button class="btn btn-p" id="startBtn" disabled>Start</button>
@@ -372,7 +372,7 @@ kbd{display:inline-block;font-family:monospace;font-size:.7rem;background:var(--
   <div class="consent-card">
     <h2>Informed Consent</h2>
     <p>You are being invited to participate in a research study on AI-assisted code review quality, conducted as part of a Master's thesis at the Hasso Plattner Institute, University of Potsdam.</p>
-    <p><strong>What you will do:</strong> For each of 6 Pull Requests, you will read a plain-language description and two AI-generated reviews side by side, then judge which review is more useful. The code diff is available as an optional reference. The study takes approximately 15&ndash;25 minutes.</p>
+    <p><strong>What you will do:</strong> For each of 6 Pull Requests, you will read a plain-language description and two AI-generated reviews side by side, then judge which review is more useful. The code diff is available as an optional reference. The study takes about 25&ndash;35 minutes; progress is saved after every Pull Request, so you can take breaks.</p>
     <p><strong>What is recorded:</strong></p>
     <ul>
       <li>The identifier you enter. It does not have to be your real name &mdash; any nickname you will remember is fine, and it lets you resume if you take a break.</li>
@@ -1749,7 +1749,7 @@ function beginEval() {
    against the copy served now and reloads once past the cache if they differ;
    BUILD_ID also travels on every payload, so `raw_log` can always answer which
    build a response came from. */
-const BUILD_ID = "2026-08-24-occupation-label";
+const BUILD_ID = "2026-08-24-time-estimate";
 
 /* Matches the 899px grid breakpoint above: at 900px the reviews are still two
    columns. The gate is re-evaluated on resize and rotation rather than latched,
